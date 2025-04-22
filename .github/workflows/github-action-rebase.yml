@@ -12,14 +12,18 @@ jobs:
     runs-on: [ ubuntu-latest ]
 
     steps:
+      - name: Generate a token
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.MAKARA_BOT_ID }}
+          private-key: ${{ secrets.MAKARA_BOT_PRIVATE_KEY }}
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ssh-key: ${{ secrets.MAKARA_BOT_PRIVATE_KEY }}
-          ssh-user: ${{ vars.MAKARA_BOT_ID }}
-          persist-credentials: true
           fetch-depth: 0
-          ref: ${{ vars.DEV_BRANCH }}
+          ref: Dev
 
       - name: Rebase branch
         run: git rebase --strategy=theirs --no-ff --no-verify --verbose origin/main
@@ -27,6 +31,6 @@ jobs:
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
-          ssh: true
+          github_token: ${{ steps.generate-token.outputs.token }}
           branch: ${{ vars.DEV_BRANCH }}
           force: true

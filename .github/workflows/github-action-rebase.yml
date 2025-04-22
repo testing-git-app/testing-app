@@ -12,13 +12,15 @@ jobs:
     runs-on: [ ubuntu-latest ]
 
     steps:
-      - uses: wow-actions/use-app-token@v2
+      - name: Generate a token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
         with:
-          app_id: ${{ secrets.APP_ID }}
-          private_key: ${{ secrets.PRIVATE_KEY }}
+          app-id: ${{ secrets.MAKARA_BOT_ID }}
+          private-key: ${{ secrets.MAKARA_BOT_PRIVATE_KEY }}
 
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: Dev
@@ -26,6 +28,6 @@ jobs:
       - name: ReSync Branch
         uses: Joao208/resync-branch@1.5.0
         with:
-          PERSONAL_TOKEN: ${{ env.BOT_TOKEN }}
+          PERSONAL_TOKEN: ${{ steps.generate-token.outputs.token }}
           BRANCH_NAME: Dev
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}

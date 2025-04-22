@@ -1,0 +1,32 @@
+name: Github Action Rebase
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  rebase:
+    runs-on: [ ubuntu-latest ]
+
+    steps:
+      - name: Generate a token
+        id: generate-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.MAKARA_BOT_ID }}
+          private-key: ${{ secrets.MAKARA_BOT_PRIVATE_KEY }}
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ steps.generate-token.outputs.token }}
+          fetch-depth: 0
+          ref: ${{ vars.DEV_BRANCH }}
+
+      - name: Rebase branch
+        run: |
+          git rebase --strategy=theirs --no-ff --no-verify --verbose origin/main
+          git push -f origin ${{ vars.DEV_BRANCH }}
